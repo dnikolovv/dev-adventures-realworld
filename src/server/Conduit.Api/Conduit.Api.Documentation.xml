@@ -1,0 +1,173 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Conduit.Api</name>
+    </assembly>
+    <members>
+        <member name="M:Conduit.Api.Controllers.ArticlesController.Get(Conduit.Core.Models.GetArticlesModel)">
+            <summary>
+            Retrieves a list of articles by various filters.
+            </summary>
+            <param name="request">The request.</param>
+            <returns>A list of articles.</returns>
+            <response code="200">Successfully fetched the requested articles.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ArticlesController.GetBySlug(System.String)">
+            <summary>
+            Retrieves an article by its slug.
+            </summary>
+            <param name="slug">The slug.</param>
+            <returns>An article or not found.</returns>
+            <response code="200">An article.</response>
+            <response code="404">Could not find the given article.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ArticlesController.GetFeed(System.Int32,System.Int32)">
+            <summary>
+            Retrieves the logged in user's feed.
+            </summary>
+            <param name="limit">Limit of shown articles.</param>
+            <param name="offset">The offset.</param>
+            <returns>A list of articles.</returns>
+            <response code="200">The current users' feed.</response>
+            <response code="404">If the id of the current user was not found (most likely a problem with the JWT claims).</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ArticlesController.Post(Conduit.Api.Requests.CreateArticleRequest)">
+            <summary>
+            Creates an article.
+            </summary>
+            <param name="request">The article data.</param>
+            <returns>An article model or an error.</returns>
+            <response code="201">An article was successfully created and an article model was returned.</response>
+            <response code="400">An error occurred.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ArticlesController.Put(System.String,Conduit.Api.Requests.UpdateArticleRequest)">
+            <summary>
+            Updates an article.
+            </summary>
+            <param name="slug">The article slug.</param>
+            <param name="request">The article data.</param>
+            <returns>An article model or an error.</returns>
+            <response code="200">An article was successfully updated and an article model was returned.</response>
+            <response code="400">An error occurred.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ArticlesController.Delete(System.String)">
+            <summary>
+            Deletes an article.
+            </summary>
+            <param name="slug">The article slug.</param>
+            <returns>The deleted article id or an error.</returns>
+            <response code="204">Successfully deleted the article.</response>
+            <response code="400">An error occurred.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ArticlesController.Favorite(System.String)">
+            <summary>
+            Favorites an article.
+            </summary>
+            <param name="slug">The article slug.</param>
+            <returns>Ok or an error.</returns>
+            <response code="200">Successfully favorited the given article.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ArticlesController.Unfavorite(System.String)">
+            <summary>
+            Removes an article favorite.
+            </summary>
+            <param name="slug">The article slug.</param>
+            <returns>Ok or an error.</returns>
+            <response code="200">Successfully unfavorited the given article.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ArticlesController.GetComments(System.String)">
+            <summary>
+            Gets all comments for a given article.
+            </summary>
+            <param name="slug">The article slug.</param>
+            <returns>A list of comments.</returns>
+            <response code="200">Got a list of comments for the given article.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ArticlesController.CreateComment(System.String,Conduit.Api.Requests.CreateCommentRequest)">
+            <summary>
+            Creates a comment.
+            </summary>
+            <param name="slug">The article slug.</param>
+            <param name="request">The comment content.</param>
+            <returns>The created comment.</returns>
+            <response code="201">A comment was created.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ArticlesController.DeleteComment(System.String,System.Int32)">
+            <summary>
+            Deletes a comment.
+            </summary>
+            <param name="slug">The article slug.</param>
+            <param name="commentId">The comment id.</param>
+            <returns>No content result.</returns>
+            <response code="204">The comment was successfully deleted.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ProfilesController.Get(System.String)">
+            <summary>
+            Retreives a user's profile by username.
+            </summary>
+            <param name="username">The username to look for.</param>
+            <returns>A user profile or not found.</returns>
+            <response code="200">Returns the user's profile.</response>
+            <response code="404">No user with tha given username was found.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ProfilesController.Follow(System.String)">
+            <summary>
+            Follows a user.
+            </summary>
+            <param name="username">The user to follow.</param>
+            <returns>The followed user's profile or an error.</returns>
+            <response code="200">Successfully followed the given user.</response>
+            <response code="400">An eror occurred.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.ProfilesController.Unfollow(System.String)">
+            <summary>
+            Unfollows a user.
+            </summary>
+            <param name="username">The user to unfollow.</param>
+            <returns>The unfollowed user's profile or an error.</returns>
+            <response code="200">Successfully unfollowed the given user.</response>
+            <response code="400">An eror occurred.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.TagsController.Get">
+            <summary>
+            Gets all tags.
+            </summary>
+            <returns>A list of tags.</returns>
+        </member>
+        <member name="M:Conduit.Api.Controllers.UserController.GetCurrentUser">
+            <summary>
+            Returns the current logged in user.
+            </summary>
+            <returns>The current logged in user.</returns>
+            <response code="200">Returns the currently logged in user.</response>
+            <response code="404">No user was found (this would mean that something is wrong with the claims).</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.UserController.UpdateCurrentUser(Conduit.Api.Requests.UpdateUserRequest)">
+            <summary>
+            Updates the currently logged in user.
+            </summary>
+            <param name="request">The update request.</param>
+            <returns>The updated user profile or an error.</returns>
+            <response code="200">Returns the updated user profile.</response>
+            <response code="400">Returns the error/s that occurred while trying to update.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.UsersController.Login(Conduit.Api.Requests.LoginUserRequest)">
+            <summary>
+            Login.
+            </summary>
+            <param name="request">The credentials.</param>
+            <returns>A JWT token.</returns>
+            <response code="200">If the credentials have a match.</response>
+            <response code="400">If the credentials don't match/don't meet the requirements.</response>
+        </member>
+        <member name="M:Conduit.Api.Controllers.UsersController.Register(Conduit.Api.Requests.RegisterUserRequest)">
+            <summary>
+            Register.
+            </summary>
+            <param name="request">The user model.</param>
+            <returns>A user model.</returns>
+            <response code="201">A user was created.</response>
+            <response code="400">Invalid input.</response>
+        </member>
+    </members>
+</doc>
