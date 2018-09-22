@@ -21,47 +21,42 @@ namespace Conduit.Business.Services
         }
 
         public Task<Option<CommentModel, Error>> CreateComment(string authorId, string articleSlug, CreateCommentModel commentModel) =>
-            GetUser(authorId.SomeNotNull())
-                .WithException<User, Error>($"No user with an id of '{authorId}' was found.")
-                .FlatMapAsync(user =>
-                    GetArticleBySlug(articleSlug)
-                        .MapAsync(async article =>
-                        {
-                            var comment = Mapper.Map<Comment>(commentModel);
+            GetUserByIdOrError(authorId).FlatMapAsync(user =>
+            GetArticleBySlug(articleSlug)
+                .MapAsync(async article =>
+                {
+                    var comment = Mapper.Map<Comment>(commentModel);
 
-                            comment.AuthorId = user.Id;
-                            comment.ArticleId = article.Id;
-                            comment.CreatedAt = DateTime.UtcNow;
-                            comment.UpdatedAt = DateTime.UtcNow;
+                    comment.AuthorId = user.Id;
+                    comment.ArticleId = article.Id;
+                    comment.CreatedAt = DateTime.UtcNow;
+                    comment.UpdatedAt = DateTime.UtcNow;
 
-                            DbContext.Comments.Add(comment);
+                    DbContext.Comments.Add(comment);
 
-                            await DbContext.SaveChangesAsync();
+                    await DbContext.SaveChangesAsync();
 
-                            return ToCommentModel(user, comment);
-                        }));
+                    return ToCommentModel(user, comment);
+                }));
 
         public Task<Option<int, Error>> DeleteComment(string deletingUserId, string articleSlug, int commentId) =>
-            GetUser(deletingUserId.SomeNotNull())
-                .WithException<User, Error>($"No user with an id of '{deletingUserId}' was found.")
-                .FlatMapAsync(user =>
-                    GetArticleBySlug(articleSlug).FlatMapAsync(_ =>
-                    GetById(commentId)
-                        .FilterAsync(async comment => comment.AuthorId == user.Id, "You must be the author of the comment in order to delete it.")
-                        .MapAsync(async comment =>
-                        {
-                            DbContext.Remove(comment);
-                            await DbContext.SaveChangesAsync();
-                            return comment.Id;
-                        })));
+            GetUserByIdOrError(deletingUserId).FlatMapAsync(user =>
+            GetArticleBySlug(articleSlug).FlatMapAsync(_ =>
+            GetCommentById(commentId)
+                .FilterAsync(async comment => comment.AuthorId == user.Id, "You must be the author of the comment in order to delete it.")
+                .MapAsync(async comment =>
+                {
+                    DbContext.Remove(comment);
+                    await DbContext.SaveChangesAsync();
+                    return comment.Id;
+                })));
 
         public Task<Option<CommentModel[], Error>> GetCommentsForArticle(Option<string> viewingUserId, string articleSlug) =>
-            GetArticleBySlug(articleSlug)
-                .MapAsync(article =>
-                    GetUser(viewingUserId)
-                        .MatchAsync(
-                            async u => ToCommentModels(u, article?.Comments?.ToArray()),
-                            async () => article.Comments.Select(Mapper.Map<CommentModel>).ToArray()));
+            GetArticleBySlug(articleSlug).MapAsync(article =>
+            GetUserById(viewingUserId)
+                .MatchAsync(
+                    async u => ToCommentModels(u, article?.Comments?.ToArray()),
+                    async () => article.Comments.Select(Mapper.Map<CommentModel>).ToArray()));
 
         private CommentModel ToCommentModel(User viewingUser, Comment comment) =>
             comment != null ?
@@ -77,7 +72,7 @@ namespace Conduit.Business.Services
             })
             .ToArray();
 
-        private Task<Option<Comment, Error>> GetById(int commentId) =>
+        private Task<Option<Comment, Error>> GetCommentById(int commentId) =>
             DbContext
                 .Comments
                 .Include(c => c.Author)

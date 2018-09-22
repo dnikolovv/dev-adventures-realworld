@@ -30,6 +30,9 @@ namespace Conduit.Business.Extensions
         public static async Task<Option<T>> FilterAsync<T>(this Task<Option<T>> optionTask, Func<T, Task<bool>> predicate) =>
             await (await optionTask).FilterAsync(predicate);
 
+        public static async Task<Option<T, TException>> FilterAsync<T, TException>(this Task<Option<T>> optionTask, Func<T, Task<bool>> predicate, TException exception) =>
+            await (await optionTask).FilterAsync(predicate).WithException(exception);
+
         public static async Task<Option<T, TException>> FilterAsync<T, TException>(this Task<Option<T, TException>> optionTask, Func<T, Task<bool>> predicate, TException exception) =>
             await (await optionTask).FilterAsync(predicate, exception);
 

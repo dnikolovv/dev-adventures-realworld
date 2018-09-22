@@ -10,6 +10,6 @@ namespace Conduit.Core.Services
 
         Task<Option<UserProfileModel, Error>> UnfollowAsync(string followerId, string userToUnfollowUsername);
 
-        Task<Option<UserProfileModel, Error>> ViewProfileAsync(string viewingUserId, string profileUsername);
+        Task<Option<UserProfileModel, Error>> ViewProfileAsync(Option<string> viewingUserId, string profileUsername);
     }
 }

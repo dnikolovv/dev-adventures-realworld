@@ -5,10 +5,9 @@ using Conduit.Core.Identity;
 using Conduit.Core.Models;
 using Conduit.Core.Services;
 using Conduit.Data.Entities;
+using Conduit.Data.EntityFramework;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Optional;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -16,12 +15,14 @@ using System.Threading.Tasks;
 
 namespace Conduit.Business.Services
 {
-    public class UsersService : IUsersService
+    public class UsersService : BaseService, IUsersService
     {
         public UsersService(
+            ApplicationDbContext dbContext,
             UserManager<User> userManager,
             IJwtFactory jwtFactory,
             IMapper mapper)
+            : base (dbContext)
         {
             UserManager = userManager;
             JwtFactory = jwtFactory;
@@ -33,36 +34,21 @@ namespace Conduit.Business.Services
         protected IMapper Mapper { get; }
 
         public Task<Option<UserModel>> GetByIdAsync(string userId) =>
-            UserManager.FindByIdAsync(userId ?? string.Empty)
-                .SomeNotNull()
+            GetUserById(userId.SomeNotNull())
                 .MapAsync(async user => Mapper.Map<UserModel>(user));
 
-        public Task<Option<User, Error>> FindUserOrError(Func<User, bool> predicate, string errorIfNone) =>
-            UserManager
-                .Users
-                .AsNoTracking()
-                .Include(u => u.Following)
-                .Include(u => u.Followers)
-                .FirstOrDefaultAsync(u => predicate(u))
-            .SomeNotNull<User, Error>(errorIfNone);
+        public Task<Option<UserModel, Error>> LoginAsync(CredentialsModel model) =>
+            GetUser(u => u.Email == model.Email)
+                .FilterAsync<User, Error>(user => UserManager.CheckPasswordAsync(user, model.Password), "Invalid credentials.")
+                .MapAsync(
+                    async user =>
+                    {
+                        var result = Mapper.Map<UserModel>(user);
 
-        public async Task<Option<UserModel, Error>> LoginAsync(CredentialsModel model)
-        {
-            var loginResult = await UserManager.FindByEmailAsync(model.Email)
-                .SomeNotNull()
-                .FilterAsync(user => UserManager.CheckPasswordAsync(user, model.Password));
+                        result.Token = GenerateToken(user.Id, user.Email);
 
-            return loginResult.Match(
-                user =>
-                {
-                    var result = Mapper.Map<UserModel>(user);
-
-                    result.Token = GenerateToken(user.Id, user.Email);
-
-                    return result.Some<UserModel, Error>();
-                },
-                () => Option.None<UserModel, Error>(new Error("Invalid credentials.")));
-        }
+                        return result;
+                    });
 
         public async Task<Option<UserModel, Error>> RegisterAsync(RegisterUserModel model)
         {
@@ -82,9 +68,7 @@ namespace Conduit.Business.Services
         }
 
         public Task<Option<UserModel, Error>> UpdateAsync(string userId, UserModel newUser) =>
-            UserManager
-                .FindByIdAsync(userId)
-                .SomeNotNull<User, Error>($"No user with id {userId} found.")
+            GetUserByIdOrError(userId)
                 .FlatMapAsync(
                     async user =>
                     {

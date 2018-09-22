@@ -3,9 +3,11 @@ using Conduit.Business.Services;
 using Conduit.Core.Identity;
 using Conduit.Core.Models;
 using Conduit.Data.Entities;
+using Conduit.Data.EntityFramework;
 using Microsoft.AspNetCore.Identity;
 using Moq;
 using Shouldly;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -14,23 +16,31 @@ using Xunit;
 
 namespace Conduit.Business.Tests.Services
 {
-    public class UsersServiceTests
+    public class UsersServiceTests : IDisposable
     {
         private readonly UsersService _usersService;
         private readonly Mock<UserManager<User>> _userManagerMock;
         private readonly Mock<IJwtFactory> _jwtFactoryMock;
         private readonly Mock<IMapper> _mapperMock;
+        private readonly ApplicationDbContext _dbContext;
 
         public UsersServiceTests()
         {
             _userManagerMock = IdentityMocksProvider.GetMockUserManager();
             _jwtFactoryMock = new Mock<IJwtFactory>();
             _mapperMock = new Mock<IMapper>();
+            _dbContext = DbContextProvider.GetInMemoryDbContext();
 
             _usersService = new UsersService(
+                _dbContext,
                 _userManagerMock.Object,
                 _jwtFactoryMock.Object,
                 _mapperMock.Object);
+        }
+
+        public void Dispose()
+        {
+            _dbContext.Database.EnsureDeleted();
         }
 
         [Theory]
@@ -38,16 +48,16 @@ namespace Conduit.Business.Tests.Services
         public async Task Login_Should_Return_Jwt(CredentialsModel model, User expectedUser, string expectedJwt)
         {
             // Arrange
-            MockFindByEmail(model.Email, expectedUser);
+            AddUserWithEmail(model.Email, expectedUser);
 
-            MockCheckPassword(expectedUser, model.Password, true);
+            MockCheckPassword(model.Password, true);
 
             _jwtFactoryMock.Setup(jwtFactory => jwtFactory
                 .GenerateEncodedToken(expectedUser.Id, expectedUser.Email, new List<Claim>()))
                 .Returns(expectedJwt);
 
             _mapperMock.Setup(mapper => mapper
-                .Map<UserModel>(expectedUser))
+                .Map<UserModel>(It.IsAny<User>()))
                 .Returns(new UserModel());
 
             // Act
@@ -62,9 +72,9 @@ namespace Conduit.Business.Tests.Services
         public async Task Login_Should_Return_Exception_When_Credentials_Are_Invalid(CredentialsModel model, User expectedUser)
         {
             // Arrange
-            MockFindByEmail(model.Email, expectedUser);
+            AddUserWithEmail(model.Email, expectedUser);
 
-            MockCheckPassword(expectedUser, model.Password, false);
+            MockCheckPassword(model.Password, false);
 
             // Act
             var result = await _usersService.LoginAsync(model);
@@ -132,14 +142,16 @@ namespace Conduit.Business.Tests.Services
                 .Map<TExpected>(model))
                 .Returns(expected);
 
-        private void MockCheckPassword(User user, string password, bool result) =>
+        private void MockCheckPassword(string password, bool result) =>
             _userManagerMock.Setup(userManager => userManager
-                .CheckPasswordAsync(user, password))
+                .CheckPasswordAsync(It.IsAny<User>(), password))
                 .ReturnsAsync(result);
 
-        private void MockFindByEmail(string email, User expected) =>
-            _userManagerMock.Setup(userManager => userManager
-                .FindByEmailAsync(email))
-                .ReturnsAsync(expected);
+        private void AddUserWithEmail(string email, User expected)
+        {
+            expected.Email = email;
+            _dbContext.Users.Add(expected);
+            _dbContext.SaveChanges();
+        }
     }
 }

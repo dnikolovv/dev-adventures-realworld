@@ -14,11 +14,11 @@ using System.Threading.Tasks;
 
 namespace Conduit.Business.Services
 {
-    public class ArticlesService : IArticlesService
+    public class ArticlesService : BaseService, IArticlesService
     {
         public ArticlesService(ApplicationDbContext dbContext, IMapper mapper)
+            : base (dbContext)
         {
-            DbContext = dbContext;
             Mapper = mapper;
         }
 
@@ -32,13 +32,10 @@ namespace Conduit.Business.Services
             .Include(a => a.Author)
                 .ThenInclude(a => a.Favorites);
 
-        protected ApplicationDbContext DbContext { get; }
-
         protected IMapper Mapper { get; }
 
         public Task<Option<ArticleModel, Error>> CreateAsync(string authorId, CreateArticleModel model) =>
-            GetUser(authorId.SomeNotNull())
-                .WithException<User, Error>("The author id did not match anyone in the database.")
+            GetUserByIdOrError(authorId)
                 .MapAsync(async author =>
                 {
                     var article = Mapper.Map<Article>(model);
@@ -78,23 +75,21 @@ namespace Conduit.Business.Services
         }
 
         public Task<Option<ArticleModel, Error>> UpdateAsync(string updatingUserId, string articleSlug, UpdateArticleModel model) =>
-            GetUser(updatingUserId.SomeNotNull())
-                .WithException<User, Error>($"No user with an id of '{updatingUserId}' was found.")
-                .FlatMapAsync(user =>
-                    GetArticleBySlug(articleSlug)
-                        .FilterAsync(async a => a.Author.Id == user.Id, "You must be the author in order to update an article.")
-                        .FlatMapAsync(async article =>
-                        {
-                            Mapper.Map(model, article);
+            GetUserByIdOrError(updatingUserId).FlatMapAsync(user =>
+            GetArticleBySlug(articleSlug)
+                .FilterAsync(async a => a.Author.Id == user.Id, "You must be the author in order to update an article.")
+                .FlatMapAsync(async article =>
+                {
+                    Mapper.Map(model, article);
 
-                            article.TagList = FromTagListToDbCollection(article, model.TagList);
-                            article.UpdatedAt = DateTime.UtcNow;
-                            DbContext.Update(article);
+                    article.TagList = FromTagListToDbCollection(article, model.TagList);
+                    article.UpdatedAt = DateTime.UtcNow;
+                    DbContext.Update(article);
 
-                            await DbContext.SaveChangesAsync();
+                    await DbContext.SaveChangesAsync();
 
-                            return await GetBySlugAsync(user.Id.Some(), articleSlug);
-                        }));
+                    return await GetBySlugAsync(user.Id.Some(), articleSlug);
+                }));
 
         public Task<Option<ArticleModel, Error>> GetBySlugAsync(Option<string> viewingUserId, string slug) =>
             GetArticleBySlug(slug)
@@ -102,8 +97,7 @@ namespace Conduit.Business.Services
                     ToArticleModelAsync(viewingUserId, article));
 
         public Task<Option<ArticleModel[], Error>> GetFeed(string viewingUserId, int limit = 20, int offset = 0) =>
-            GetUser(viewingUserId.SomeNotNull())
-                .WithException<User, Error>($"There no user with an id of {viewingUserId}.")
+            GetUserByIdOrError(viewingUserId)
                 .MapAsync(async viewingUser =>
                 {
                     var followedUserIds = viewingUser
@@ -121,57 +115,51 @@ namespace Conduit.Business.Services
                 });
 
         public Task<Option<ArticleModel, Error>> FavoriteAsync(string userId, string slug) =>
-            GetUser(userId.SomeNotNull())
-                .WithException<User, Error>($"No user with an id of '{userId}' was found.")
-                .FlatMapAsync(user =>
-                    GetArticleBySlug(slug)
-                        .FilterAsync(async article => !article.Favorites.Any(af => af.UserId == userId), "You have already favorited this article.")
-                        .FlatMapAsync(async article =>
-                        {
-                            var articleFavorite = new ArticleFavorite
-                            {
-                                ArticleId = article.Id,
-                                UserId = userId
-                            };
+            GetUserByIdOrError(userId).FlatMapAsync(user =>
+            GetArticleBySlug(slug)
+                .FilterAsync(async article => !article.Favorites.Any(af => af.UserId == userId), "You have already favorited this article.")
+                .FlatMapAsync(async article =>
+                {
+                    var articleFavorite = new ArticleFavorite
+                    {
+                        ArticleId = article.Id,
+                        UserId = userId
+                    };
 
-                            DbContext.ArticleFavorites.Add(articleFavorite);
+                    DbContext.ArticleFavorites.Add(articleFavorite);
 
-                            await DbContext.SaveChangesAsync();
+                    await DbContext.SaveChangesAsync();
 
-                            return await GetBySlugAsync(user.Id.Some(), slug);
-                        }));
+                    return await GetBySlugAsync(user.Id.Some(), slug);
+                }));
 
         public Task<Option<ArticleModel, Error>> UnfavoriteAsync(string userId, string slug) =>
-            GetUser(userId.SomeNotNull())
-                .WithException<User, Error>($"No user with an id of '{userId}' was found.")
-                .FlatMapAsync(user =>
-                    GetArticleBySlug(slug)
-                        .FilterAsync(async a => a.Favorites.Any(af => af.UserId == userId), "You have not favorited this article.")
-                        .FlatMapAsync(async article =>
-                        {
-                            var articleFavorite = article
-                                .Favorites
-                                .First(af => af.UserId == userId);
+            GetUserByIdOrError(userId).FlatMapAsync(user =>
+            GetArticleBySlug(slug)
+                .FilterAsync(async a => a.Favorites.Any(af => af.UserId == userId), "You have not favorited this article.")
+                .FlatMapAsync(async article =>
+                {
+                    var articleFavorite = article
+                        .Favorites
+                        .First(af => af.UserId == userId);
 
-                            DbContext.Remove(articleFavorite);
+                    DbContext.Remove(articleFavorite);
 
-                            await DbContext.SaveChangesAsync();
+                    await DbContext.SaveChangesAsync();
 
-                            return await GetBySlugAsync(user.Id.Some(), slug);
-                        }));
+                    return await GetBySlugAsync(user.Id.Some(), slug);
+                }));
 
         public Task<Option<int, Error>> DeleteAsync(string deletingUserId, string slug) =>
-            GetUser(deletingUserId.SomeNotNull())
-                .WithException<User, Error>($"No user with an id of '{deletingUserId}' was found.")
-                .FlatMapAsync(user =>
-                    GetArticleBySlug(slug)
-                        .FilterAsync(async a => a.Author.Id == user.Id, "You must be the author in order to delete an article.")
-                        .MapAsync(async article =>
-                        {
-                            DbContext.Remove(article);
-                            await DbContext.SaveChangesAsync();
-                            return article.Id;
-                        }));
+            GetUserByIdOrError(deletingUserId).FlatMapAsync(user =>
+            GetArticleBySlug(slug)
+                .FilterAsync(async a => a.Author.Id == user.Id, "You must be the author in order to delete an article.")
+                .MapAsync(async article =>
+                {
+                    DbContext.Remove(article);
+                    await DbContext.SaveChangesAsync();
+                    return article.Id;
+                }));
 
         protected static bool IsFollowingAuthor(User viewingUser, UserProfileModel author) =>
             viewingUser != null &&
@@ -185,17 +173,6 @@ namespace Conduit.Business.Services
                     await AllArticlesQueryable
                         .FirstOrDefaultAsync(a => a.Slug.ToLower() == slug.ToLower())
                         .SomeNotNull<Article, Error>($"No article with slug '{slug}' was found."));
-
-        protected Task<Option<User>> GetUser(Option<string> viewingUserId) =>
-            viewingUserId
-                .FlatMapAsync(async id =>
-                (await DbContext
-                    .Users
-                    .Include(u => u.Following)
-                    .Include(u => u.Followers)
-                    .Include(u => u.Favorites)
-                    .AsNoTracking()
-                    .FirstOrDefaultAsync(u => u.Id == id)).SomeNotNull());
 
         private List<ArticleTag> FromTagListToDbCollection(Article article, ICollection<string> tagList)
         {
@@ -246,7 +223,7 @@ namespace Conduit.Business.Services
             null;
 
         private Task<ArticleModel[]> SetFollowingAndFavorited(Option<string> viewingUserId, params ArticleModel[] articles) =>
-            GetUser(viewingUserId)
+            GetUserById(viewingUserId)
                 .MatchAsync(
                     async user => articles.Select(a => SetFollowingAndFavorited(user, a)).ToArray(),
                     async () => articles);

@@ -4,6 +4,7 @@ using Conduit.Core.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Optional;
 using System.Threading.Tasks;
 
 namespace Conduit.Api.Controllers
@@ -29,7 +30,7 @@ namespace Conduit.Api.Controllers
         [ProducesResponseType(typeof(UserProfileModel), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(Error), StatusCodes.Status400BadRequest)]
         public async Task<IActionResult> Get(string username) =>
-            (await _profilesService.ViewProfileAsync(CurrentUserId, username))
+            (await _profilesService.ViewProfileAsync(CurrentUserId.SomeNotNull(), username))
             .Match<IActionResult>(profile => Ok(new { profile }), Error);
 
         /// <summary>
