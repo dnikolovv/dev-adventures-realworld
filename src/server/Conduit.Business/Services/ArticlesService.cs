@@ -25,6 +25,8 @@ namespace Conduit.Business.Services
         protected IQueryable<Article> AllArticlesQueryable => DbContext
             .Articles
             .AsNoTracking()
+            .Include(a => a.Comments)
+                .ThenInclude(c => c.Author)
             .Include(a => a.TagList)
                 .ThenInclude(at => at.Tag)
             .Include(a => a.Favorites)
@@ -171,6 +173,7 @@ namespace Conduit.Business.Services
                 .Map(s => s.ToLower())
                 .FlatMapAsync(async s =>
                     await AllArticlesQueryable
+                        .OrderByDescending(a => a.CreatedAt)
                         .FirstOrDefaultAsync(a => a.Slug.ToLower() == slug.ToLower())
                         .SomeNotNull<Article, Error>($"No article with slug '{slug}' was found."));
 

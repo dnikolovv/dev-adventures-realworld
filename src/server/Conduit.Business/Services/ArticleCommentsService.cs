@@ -16,7 +16,7 @@ namespace Conduit.Business.Services
     public class ArticleCommentsService : ArticlesService, IArticleCommentsService
     {
         public ArticleCommentsService(ApplicationDbContext dbContext, IMapper mapper)
-            : base (dbContext, mapper)
+            : base(dbContext, mapper)
         {
         }
 
@@ -35,6 +35,7 @@ namespace Conduit.Business.Services
                     DbContext.Comments.Add(comment);
 
                     await DbContext.SaveChangesAsync();
+                    await DbContext.Entry(comment).Reference(c => c.Author).LoadAsync();
 
                     return ToCommentModel(user, comment);
                 }));
@@ -67,7 +68,12 @@ namespace Conduit.Business.Services
             comments?.Select(c =>
             {
                 var model = Mapper.Map<CommentModel>(c);
-                model.Author.Following = IsFollowingAuthor(viewingUser, model.Author);
+
+                if (model.Author != null)
+                {
+                    model.Author.Following = IsFollowingAuthor(viewingUser, model.Author);
+                }
+
                 return model;
             })
             .ToArray();

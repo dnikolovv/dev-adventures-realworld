@@ -22,7 +22,7 @@ namespace Conduit.Business.Services
             UserManager<User> userManager,
             IJwtFactory jwtFactory,
             IMapper mapper)
-            : base (dbContext)
+            : base(dbContext)
         {
             UserManager = userManager;
             JwtFactory = jwtFactory;
@@ -72,9 +72,10 @@ namespace Conduit.Business.Services
                 .FlatMapAsync(
                     async user =>
                     {
-                        var userToUpdate = Mapper.Map(newUser, user);
+                        Mapper.Map(newUser, user);
+                        DbContext.Attach(user);
 
-                        var updateResult = (await UserManager.UpdateAsync(userToUpdate))
+                        var updateResult = (await UserManager.UpdateAsync(user))
                             .SomeWhen(
                                 res => res.Succeeded,
                                 res => res.Errors.Select(e => e.Description).ToArray());
