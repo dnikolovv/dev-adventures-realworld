@@ -19,6 +19,8 @@ What's special about this specific implementation is that it employs different f
 
 This application has been written using the [Dev Adventures .NET Core template](https://marketplace.visualstudio.com/items?itemName=dnikolovv.dev-adventures-project-setup), therefore it has all of the features that the template provides.
 
+# Features
+
 - [x] AutoMapper
 - [x] EntityFramework Core with SQL Server and ASP.NET Identity
 - [x] JWT authentication/authorization
@@ -73,5 +75,9 @@ Production <br>
 
 # Getting started
 
-> npm install, npm start, etc.
+1. Set the connection string in `src/server/Conduit.Api/appsettings.json` to a running SQL Server instance. Set the database name to an unexisting one.
+2. Execute `dotnet restore`
+3. Execute `dotnet build`
+4. Execute `dotnet ef database update`
+5. Execute `dotnet run`
 
