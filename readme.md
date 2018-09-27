@@ -61,7 +61,7 @@ public async Task<IActionResult> Get(string username) =>
     .Match<IActionResult>(profile => Ok(new { profile }), Error);
 ```
 
-- [x] Robust service layer using the [Either](http://optional-github.com) monad.
+- [x] Robust service layer using the [Either](https://devadventures.net/2018/09/20/real-life-examples-of-functional-c-sharp-either/) monad.
 
 ```csharp
 public interface IProfilesService
@@ -94,7 +94,7 @@ public Task<Option<UserProfileModel, Error>> FollowAsync(string followerId, stri
         }));
 ```
 
-- [x] Safe query string parameter model binding using the [Option](http://optional-github.com) monad.
+- [x] Safe query string parameter model binding using the [Option](https://github.com/nlkl/Optional) monad.
 
 ```csharp
 public class GetArticlesModel
