@@ -40,6 +40,10 @@ namespace Conduit.Api.Configuration
             services.AddIdentity<User, IdentityRole>(opts =>
                 {
                     opts.User.RequireUniqueEmail = true;
+                    opts.Password.RequireDigit = false;
+                    opts.Password.RequireLowercase = false;
+                    opts.Password.RequireNonAlphanumeric = false;
+                    opts.Password.RequireUppercase = false;
                 })
                 .AddEntityFrameworkStores<ApplicationDbContext>();
 
