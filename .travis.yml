@@ -1,2 +1,12 @@
-language: csharp
-solution: Conduit.sln
+language: csharp 
+dist: trusty
+mono: none
+dotnet: 2.1
+branches:  
+  only:  
+    - master
+script:  
+  - dotnet restore --no-cache
+  - dotnet build
+  - cd tests
+  - dotnet test Conduit.Business.Tests/Conduit.Business.Tests.csproj

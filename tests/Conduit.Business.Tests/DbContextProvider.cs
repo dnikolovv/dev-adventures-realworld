@@ -8,6 +8,6 @@ namespace Conduit.Business.Tests
     {
         public static ApplicationDbContext GetInMemoryDbContext() =>
             new ApplicationDbContext(new DbContextOptionsBuilder<ApplicationDbContext>()
-                .UseInMemoryDatabase($"Business.Tests").Options);
+                .UseInMemoryDatabase($"Business.Tests-{Guid.NewGuid().ToString()}").Options);
     }
 }
