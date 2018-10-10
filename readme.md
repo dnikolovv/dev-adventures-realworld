@@ -1,4 +1,6 @@
 
+[![Build Status](https://travis-ci.com/dnikolovv/dev-adventures-realworld.svg?branch=master)](https://travis-ci.com/dnikolovv/dev-adventures-realworld)
+
 # ![RealWorld Example App](logo.png)
 
 > ### A functionally written ASP.NET Core codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld) spec and API.
