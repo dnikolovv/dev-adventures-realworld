@@ -1,11 +1,11 @@
 ﻿using AutoMapper;
-using Conduit.Business.Extensions;
 using Conduit.Core;
 using Conduit.Core.Models;
 using Conduit.Core.Services;
 using Conduit.Data.Entities;
 using Conduit.Data.EntityFramework;
 using Optional;
+using Optional.Async;
 using System.Linq;
 using System.Threading.Tasks;
 

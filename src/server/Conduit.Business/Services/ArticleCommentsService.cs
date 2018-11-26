@@ -7,6 +7,7 @@ using Conduit.Data.Entities;
 using Conduit.Data.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Optional;
+using Optional.Async;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

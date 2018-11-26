@@ -1,9 +1,9 @@
-﻿using Conduit.Business.Extensions;
-using Conduit.Core;
+﻿using Conduit.Core;
 using Conduit.Data.Entities;
 using Conduit.Data.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Optional;
+using Optional.Async;
 using System;
 using System.Threading.Tasks;
 

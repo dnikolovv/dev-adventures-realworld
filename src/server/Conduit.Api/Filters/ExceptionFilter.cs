@@ -1,8 +1,8 @@
-﻿using System.Net;
-using Conduit.Core;
+﻿using Conduit.Core;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
+using System.Net;
 
 namespace Conduit.Api.Filters
 {

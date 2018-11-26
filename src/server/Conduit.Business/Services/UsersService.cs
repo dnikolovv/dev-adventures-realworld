@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Conduit.Business.Extensions;
 using Conduit.Core;
 using Conduit.Core.Identity;
 using Conduit.Core.Models;
@@ -8,6 +7,7 @@ using Conduit.Data.Entities;
 using Conduit.Data.EntityFramework;
 using Microsoft.AspNetCore.Identity;
 using Optional;
+using Optional.Async;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;

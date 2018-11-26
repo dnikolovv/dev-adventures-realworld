@@ -1,11 +1,11 @@
-﻿using Microsoft.Extensions.Options;
+﻿using Conduit.Core.Configuration;
+using Conduit.Core.Identity;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using Conduit.Core.Configuration;
-using Conduit.Core.Identity;
 
 namespace Conduit.Business.Identity
 {

@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using Conduit.Business.Extensions;
 using Conduit.Core;
 using Conduit.Core.Models;
 using Conduit.Core.Services;
@@ -7,6 +6,7 @@ using Conduit.Data.Entities;
 using Conduit.Data.EntityFramework;
 using Microsoft.EntityFrameworkCore;
 using Optional;
+using Optional.Async;
 using System;
 using System.Collections.Generic;
 using System.Linq;

@@ -20,6 +20,7 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="6.2.2" />
     <PackageReference Include="Optional" Version="4.0.0" />
+    <PackageReference Include="Optional.Async" Version="1.1.0" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.0.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.2.2" />
   </ItemGroup>
