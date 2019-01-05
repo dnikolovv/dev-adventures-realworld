@@ -57,6 +57,11 @@ namespace Conduit.Api
         {
             loggerFactory.AddLogging(Configuration.GetSection("Logging"));
 
+            if (env.IsDevelopment())
+            {
+                dbContext.Database.EnsureCreated();
+            }
+
             app.UseSwagger("My Web API.");
             app.UseStaticFiles();
             app.UseAuthentication();

@@ -1,0 +1,31 @@
+version: '3.4'
+
+services:
+  conduit.sql:
+    image: postgres:11.1
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+  conduit.api:
+    image: conduitapi
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+    build:
+      context: .
+      dockerfile: src/server/Conduit.Api/Dockerfile
+    depends_on:
+      - conduit.sql
+    links:
+      - conduit.sql:db
+  conduit.testrunner:
+    image: conduittestrunner
+    environment:
+      APIURL: api/api
+    build:
+      context: ./tests/Postman
+      dockerfile: Dockerfile
+    depends_on:
+      - conduit.api
+    links:
+      - conduit.api:api

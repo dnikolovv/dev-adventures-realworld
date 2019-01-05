@@ -114,7 +114,7 @@ public class GetArticlesModel
 ```
 
 - [x] AutoMapper
-- [x] EntityFramework Core with SQL Server and ASP.NET Identity
+- [x] EntityFramework Core with ~~SQL Server~~ Postgres and ASP.NET Identity
 - [x] JWT authentication/authorization
 - [x] File logging with Serilog
 - [x] Stylecop
