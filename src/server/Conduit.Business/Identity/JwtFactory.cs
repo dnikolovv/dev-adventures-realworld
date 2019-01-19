@@ -26,7 +26,7 @@ namespace Conduit.Business.Identity
                 new Claim(JwtRegisteredClaimNames.Sub, userId),
                 new Claim(JwtRegisteredClaimNames.Email, email),
                 new Claim(JwtRegisteredClaimNames.Jti, _jwtOptions.JtiGenerator()),
-                new Claim(JwtRegisteredClaimNames.Iat, ToUnixEpochDate(_jwtOptions.IssuedAt).ToString(), ClaimValueTypes.Integer64),
+                new Claim(JwtRegisteredClaimNames.Iat, new DateTimeOffset(_jwtOptions.IssuedAt).ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
             }
             .Concat(additionalClaims);
 
@@ -42,16 +42,6 @@ namespace Conduit.Business.Identity
 
             return encodedJwt;
         }
-
-        /// <summary>
-        /// Converts a date to Unix epoch.
-        /// </summary>
-        /// <param name="date">The date to convert</param>
-        /// <returns>Date converted to seconds since Unix epoch (Jan 1, 1970, midnight UTC).</returns>
-        private static long ToUnixEpochDate(DateTime date)
-          => (long)Math.Round((date.ToUniversalTime() -
-                               new DateTimeOffset(1970, 1, 1, 0, 0, 0, TimeSpan.Zero))
-                              .TotalSeconds);
 
         private static void ThrowIfInvalidOptions(JwtConfiguration options)
         {
