@@ -202,7 +202,7 @@ public async Task Login_Should_Return_Exception_When_Credentials_Are_Invalid(Cre
 
 # Getting started
 
-1. Set the connection string in `src/server/Conduit.Api/appsettings.json` to a running SQL Server instance. Set the database name to an unexisting one.
+1. Set the connection string in `src/server/Conduit.Api/appsettings.json` to a running Postgres instance. Set the database name to an unexisting one.
 2. Execute `dotnet restore`
 3. Execute `dotnet build`
 4. Execute `dotnet ef database update`
