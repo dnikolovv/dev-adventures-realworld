@@ -43,7 +43,7 @@ This application has been made using the [Dev Adventures .NET Core template](htt
 
 - [x] Swagger UI + Fully Documented Controllers
 
-![swagger-ui](https://raw.githubusercontent.com/dnikolovv/devadventures-net-core-template/master/images/swagger-ui.JPG)
+![swagger-ui](./img/swagger-ui.JPG)
 
 
 - [x] Thin Controllers
@@ -173,7 +173,7 @@ public class GetArticlesModel
 ```
 
 - [x] Neatly organized solution structure <br>
-![solution-structure](https://raw.githubusercontent.com/dnikolovv/devadventures-net-core-template/master/images/solution-structure.JPG)
+![solution-structure](./img/solution-structure.JPG)
 
 ### Test Suite
 - [x] xUnit
